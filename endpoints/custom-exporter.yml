@@ -1,0 +1,3 @@
+- targets: [fs-m-login-001:50150,fs-m-login-001:50250,fs-m-login-001:50350]
+  labels:
+    module: custom-exporter

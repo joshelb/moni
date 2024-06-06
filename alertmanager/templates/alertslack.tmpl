@@ -1,0 +1,7 @@
+{{ define "slack.alert.text" -}}
+{{ range .Alerts }}{{ .Annotations.summary }}
+{{  .Annotations.description }}
+{{ .Annotations.message }}
+
+{{-  end }}
+{{- end }}

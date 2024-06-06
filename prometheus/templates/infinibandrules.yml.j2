@@ -1,0 +1,58 @@
+groups:
+  - name: Infiniband
+    rules:
+    - alert: InfiniBand Physical state is not LinkUp
+      expr: node_infiniband_physical_state_id != 5
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "{{ $labels.device }} has Physical State {{ $value }} in {{ $labels.instance }}"
+        summary: "{{ $labels.device }} has Physical State {{ $value }} in {{ $labels.instance }}"
+    - alert: InfiniBand Port State ID is not Active
+      expr:  node_infiniband_state_id  != 4
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "InfiniBand port {{ $labels.device }} has state ID {{ $value }} in {{ $labels.instance }}"
+        summary: "InfiniBand port {{ $labels.device }} has state ID {{ $value }} in {{ $labels.instance }}"
+    - alert: Infiniband Flaps Total
+      expr: infiniband_flaps_total
+      for: 1m
+      labels:
+        customer: mistral
+        severity: critical
+      annotations:
+        description: "{{ $value }} Infiniband Flaps on  {{ $labels.interface }} on server {{ $labels.host }}"
+        summary: "{{ $value }} Infiniband Flaps on  {{ $labels.interface }} on server {{ $labels.host }}"
+    - alert: Infiniband State Change min  (Flap)
+      expr: min_over_time(infiniband_state{host="fs-m-077"}[5m]) != 1
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "{{ $value }} Infiniband State on  {{ $labels.interface }} on server {{ $labels.host }}"
+        summary: "{{ $value }} Infiniband State on  {{ $labels.interface }} on server {{ $labels.host }}"
+    - alert: Infiniband State Change max  (Flap)
+      expr: max_over_time(infiniband_state{host="fs-m-077"}[5m]) != 1
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "{{ $value }} Infiniband State on  {{ $labels.interface }} on server {{ $labels.host }}"
+        summary: "{{ $value }} Infiniband State on  {{ $labels.interface }} on server {{ $labels.host }}"
+
+    - alert:  Infiniband Interfaces are less than 9
+      expr: fs_number_of_infinibands < 9
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "Server {{ $labels.host }} has less than 9 infiniband interfaces check ibstat and report to DC"
+        summary: "Mistral  Server {{ $labels.host}} has less than 9 Infiniband Interfaces"

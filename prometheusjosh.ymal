@@ -1,0 +1,6 @@
+- hosts: "{{ hostlist | default('all') }}"
+  become: yes
+  tasks:
+    - name: configure prometheus
+      include_role:
+        name: prometheus

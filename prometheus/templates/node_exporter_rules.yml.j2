@@ -1,0 +1,75 @@
+groups:
+  - name: Node Exporter
+    rules:
+    - alert: /home is filling up
+      expr: (node_filesystem_avail_bytes{fstype!="",mountpoint="/home"} / node_filesystem_size_bytes{fstype!="",mountpoint="/home"} * 100)  < 7
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "/home only {{ $value }} percent free space in {{ $labels.instance }}"
+        summary: "/home only {{ $value }} percent free space in {{ $labels.instance }}"
+    - alert: /sw is filling up
+      expr: (node_filesystem_avail_bytes{fstype!="",mountpoint="/sw"} / node_filesystem_size_bytes{fstype!="",mountpoint="/sw"} * 100)  < 7
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "/sw only {{ $value }} percent free space in {{ $labels.instance }}"
+        summary: "/sw only {{ $value }} percent free space in {{ $labels.instance }}"
+    - alert: NodeNetworkInterfaceFlapping
+      expr: changes(node_network_up{device!~"veth.+"}[2m]) > 2
+      for: 2m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "Network interface {{ $labels.device }} changing its up status often on node-exporter {{ $labels.namespace }}/{{ $labels.pod }}"
+        summary: "Network interface is often changing its status"
+    - alert: NodeFilesystemSpaceFillingUp
+      expr: (node_filesystem_avail_bytes{fstype!="",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",mountpoint!=""} * 100 < 15 and predict_linear(node_filesystem_avail_bytes{fstype!="",mountpoint!=""}[6h], 24 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",mountpoint!=""} == 0)
+      for: 1h
+      labels:
+        customer: mistral
+        severity: critical
+      annotations:
+        description: 'Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left and is filling up.'
+        summary: "Filesystem is predicted to run out of space within the next 24 hours."
+    - alert: NodeFilesystemSpaceFillingUpFast
+      expr: (node_filesystem_avail_bytes{fstype!="",job="node-exporter",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job="node-exporter",mountpoint!=""} * 100 < 10 and predict_linear(node_filesystem_avail_bytes{fstype!="",job="node-exporter",mountpoint!=""}[6h], 4 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job="node-exporter",mountpoint!=""} == 0)
+      for: 1h
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: 'Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left and is filling up fast.'
+        summary: "Filesystem is predicted to run out of space within the next 4 hours."
+    - alert: ReadOnly FileSystem
+      expr: node_filesystem_readonly{fstype="ext4",mountpoint="/"} == 1
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "ReadOnly FileSystem in {{ $labels.instance }}"
+        summary: "ReadOnly FileSystem in {{ $labels.instance }}"
+    - alert: nvme disk is missing
+      expr: count by (instance) (node_nvme_info) < 1
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "nvme disk in {{ $labels.instance }} is missing"
+        summary: "nvme disk in {{ $labels.instance }} is missing"
+    - alert: ROOT FileSystemFull
+      expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100 < 20
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "Root volume is dangerously full: {{ $value | humanize }}% free."
+        summary: "Root filesystem is dangerously full"

@@ -1,0 +1,11 @@
+apiVersion: 1
+
+datasources:
+- name: mistral2
+  type: prometheus
+  url: https://mu-monitoring.fluidstack.com/
+  isDefault: false
+  editable: true
+  basicAuth: true
+  basicAuthUser: admin
+  basicAuthPassword: kHG58Wri9gMw45t88L@Lx

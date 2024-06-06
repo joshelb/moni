@@ -1,0 +1,41 @@
+global:
+  slack_api_url: 'https://hooks.slack.com/services/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'
+route:
+  group_by: ['...']
+  group_wait: 10s
+  repeat_interval: 1m
+  receiver: "null"
+  routes:
+  - receiver: slack-fs
+    continue: true
+    matchers:
+      - severity="slack"
+  - receiver: webhook
+    continue: true
+    matchers:
+      - severity="slack"
+  - receiver: fs-pagerduty
+    continue: true
+    matchers:
+      - severity="slack"
+
+
+
+receivers:
+  - name: "null"
+  - name: 'slack-fs'
+    slack_configs:
+      - channel: '#support-mistral'
+        text: '{{ template "slack.alert.text" . }}'
+        send_resolved: true
+  - name: 'webhook'
+    webhook_configs:
+      - url: 'http://164.92.174.105:31999'
+        send_resolved: true
+  - name: 'fs-pagerduty'
+    pagerduty_configs:
+      - service_key: 'aba47fe9d590420bc0baf17a14bf35a0'
+        send_resolved: true
+
+templates:
+- 'alertslack.tmpl'

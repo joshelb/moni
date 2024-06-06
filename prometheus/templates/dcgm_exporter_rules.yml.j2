@@ -1,0 +1,40 @@
+groups:
+  - name: DCGM
+    rules:
+    - alert: GPU Temperature exceeds Max Operating Temperature 85 C
+      annotations:
+        description: "GPU {{ $labels.device}} on {{ $labels.instance }} Temperature exceeds Max Operating Temperature 85 C"
+        summary: "GPU {{ $labels.device}} on {{ $labels.instance }} Temperature exceeds Max Operating Temperature 85 C"
+        title: "GPU {{ $labels.device}} on {{ $labels.instance }} Temperature exceeds Max Operating Temperature 85 C"
+      expr: max_over_time(DCGM_FI_DEV_GPU_TEMP[1m]) > 85
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+    - alert: GPU Uncorrectable Remapped Rows
+      annotations:
+        summary: "GPU {{ $labels.device}} has {{ $value }} Uncorrectable Remapped Rows in {{ $labels.instance }}"
+        title: "GPU {{ $labels.device}} has {{ $value }} Uncorrectable Remapped Rows in {{ $labels.instance }}"
+      expr: DCGM_FI_DEV_UNCORRECTABLE_REMAPPED_ROWS > 2 and DCGM_FI_DEV_ROW_REMAP_FAILURE != 0
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+    - alert: XID Error
+      expr: DCGM_FI_DEV_XID_ERRORS != 0
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "GPU {{ $labels.device}} has XID Error {{ $value }} in {{ $labels.instance }}"
+        summary: "GPU {{ $labels.device}} has XID Error {{ $value }} in {{ $labels.instance }}"
+    - alert: Memory High Temp
+      expr: DCGM_FI_DEV_MEMORY_TEMP > 85
+      for: 1m
+      labels:
+        customer: mistral
+        severity: slack
+      annotations:
+        description: "GPU Memory on {{ $labels.device}} exceeds Max Operating Temperature 70 C ({{ $value }}) in {{ $labels.instance }}"
+        summary: "GPU Memory on {{ $labels.device}} exceeds Max Operating Temperature 70 C ({{ $value }}) in {{ $labels.instance }}"

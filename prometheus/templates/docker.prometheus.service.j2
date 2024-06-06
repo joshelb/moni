@@ -1,0 +1,15 @@
+[Unit]
+Description=Prometheus
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=/usr/bin/docker pull {{ prometheus_container }}
+ExecStart=/usr/bin/docker run --rm --network host --memory=50g --name %n -v /etc/prometheus:/etc/prometheus -v deepops_prometheus_metrics:/prometheus prom/prometheus:latest --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml  --web.config.file=/etc/prometheus/web.yml
+
+[Install]
+WantedBy=multi-user.target
